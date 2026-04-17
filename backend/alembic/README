@@ -1,0 +1,7 @@
+Generic single-database Alembic configuration.
+
+Usage:
+  alembic revision --autogenerate -m "message"
+  alembic upgrade head
+  alembic downgrade -1
+  alembic history

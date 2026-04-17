@@ -1,0 +1,34 @@
+# Render Blueprint — deploys the FastAPI backend as a free Web Service.
+# Steps to deploy:
+#   1. Push this repo to GitHub
+#   2. Go to https://render.com → New → Blueprint → pick this repo
+#   3. Render reads this file and provisions the service
+#   4. Set the DATABASE_URL env var to your Neon/Supabase Postgres connection string
+services:
+  - type: web
+    name: crm-backend
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "bash start.sh"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.10"
+      - key: SECRET_KEY
+        generateValue: true            # Render auto-generates a random value
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: UPLOAD_DIR
+        value: "/tmp/uploads"          # ephemeral — fine for demo; use cloud storage for production
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "25"
+      - key: DATABASE_URL
+        sync: false                    # set manually in Render dashboard after creating Neon DB
+      - key: BACKEND_CORS_ORIGINS
+        sync: false                    # set to your Vercel URL, e.g. https://my-crm.vercel.app
+      # Flip SEED_ON_STARTUP=true on first deploy to populate demo data, then remove it.
+      - key: SEED_ON_STARTUP
+        value: "false"

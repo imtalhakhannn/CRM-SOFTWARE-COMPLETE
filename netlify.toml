@@ -1,0 +1,16 @@
+# Optional: deploy frontend to Netlify instead of Vercel.
+# In Netlify: New site → Import from Git → pick this repo → base dir `frontend`
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "frontend/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback — all routes serve index.html so React Router can handle them
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
