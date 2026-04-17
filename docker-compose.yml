@@ -1,0 +1,60 @@
+# Local dev — one command spins up DB + backend + frontend.
+#   docker compose up --build
+# Visit:
+#   frontend → http://localhost:8080
+#   backend  → http://localhost:8000/docs
+#   mysql    → localhost:3306 (user root / imTalha18@)
+#
+# First run: pass SEED_ON_STARTUP=true the first time to populate demo data.
+#   docker compose run -e SEED_ON_STARTUP=true --rm backend bash start.sh
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: imTalha18@
+      MYSQL_DATABASE: crm
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pimTalha18@"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://root:imTalha18%40@db:3306/crm?charset=utf8mb4
+      SECRET_KEY: dev-only-change-me
+      BACKEND_CORS_ORIGINS: "http://localhost:8080,http://localhost:5173"
+      UPLOAD_DIR: /app/uploads
+      SEED_ON_STARTUP: "${SEED_ON_STARTUP:-false}"
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000/api/v1
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:
+  uploads_data:
