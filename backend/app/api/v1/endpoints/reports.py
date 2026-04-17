@@ -80,12 +80,13 @@ def contacts_by_type(db: Session = Depends(get_db), _: User = Depends(get_curren
 
 @router.get("/revenue-monthly")
 def revenue_monthly(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    rows = (
-        db.query(
-            func.date_format(Invoice.issue_date, "%Y-%m").label("month"),
-            func.coalesce(func.sum(Invoice.amount_paid), 0).label("paid"),
-            func.coalesce(func.sum(Invoice.total), 0).label("invoiced"),
-        )
-        .group_by("month").order_by("month").all()
-    )
-    return [{"month": m, "paid": float(p), "invoiced": float(i)} for m, p, i in rows]
+    """DB-agnostic monthly aggregation (works on SQLite, MySQL and Postgres)."""
+    from collections import defaultdict
+
+    rows = db.query(Invoice.issue_date, Invoice.amount_paid, Invoice.total).all()
+    agg = defaultdict(lambda: {"paid": 0.0, "invoiced": 0.0})
+    for issue_date, paid, total in rows:
+        month = issue_date.strftime("%Y-%m") if issue_date else "unknown"
+        agg[month]["paid"] += float(paid or 0)
+        agg[month]["invoiced"] += float(total or 0)
+    return [{"month": m, **v} for m, v in sorted(agg.items())]
