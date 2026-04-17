@@ -2,8 +2,8 @@
 #   docker compose up --build
 # Visit:
 #   frontend → http://localhost:8080
-#   backend  → http://localhost:8000/docs
-#   mysql    → localhost:3306 (user root / imTalha18@)
+#   backend  → http://localhost:8001/docs
+#   mysql    → localhost:3307 (user root / imTalha18@)  — 3307 on host, 3306 inside
 #
 # First run: pass SEED_ON_STARTUP=true the first time to populate demo data.
 #   docker compose run -e SEED_ON_STARTUP=true --rm backend bash start.sh
@@ -16,7 +16,8 @@ services:
       MYSQL_ROOT_PASSWORD: imTalha18@
       MYSQL_DATABASE: crm
     ports:
-      - "3306:3306"
+      # Host 3307 → container 3306 (host 3306 is usually taken by a local MySQL install)
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -40,7 +41,8 @@ services:
       SEED_ON_STARTUP: "${SEED_ON_STARTUP:-false}"
       PORT: "8000"
     ports:
-      - "8000:8000"
+      # Host 8001 → container 8000 (host 8000 is often taken by a local uvicorn)
+      - "8001:8000"
     volumes:
       - uploads_data:/app/uploads
 
@@ -48,7 +50,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:8000/api/v1
+        VITE_API_URL: http://localhost:8001/api/v1
     restart: unless-stopped
     depends_on:
       - backend
