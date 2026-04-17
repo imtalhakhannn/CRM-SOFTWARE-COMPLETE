@@ -1,6 +1,26 @@
 # CRM Software
 
-> 🚀 **Want to deploy this live for free?** See [DEPLOY.md](DEPLOY.md) — Neon + Render + Vercel in ~15 min, no credit card.
+## 🚀 One-click deploy (single container, one URL)
+
+The repo ships with an **all-in-one Dockerfile** that bundles the React frontend into the FastAPI backend, so you deploy **one service** and get **one public URL**.
+
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE&branch=main&name=crm&builder=dockerfile&ports=8000;http;/&env[SECRET_KEY]=change-me-to-a-long-random-string&env[SEED_ON_STARTUP]=true&env[BACKEND_CORS_ORIGINS]=*)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
+
+After clicking **Deploy to Koyeb** (easiest, no credit card):
+
+1. Sign up with GitHub (one time, ~30 s)
+2. Add a free **Koyeb Postgres** service → copy its connection string
+3. On the CRM service page → **Environment** → set:
+   - `DATABASE_URL` = `postgresql+psycopg2://…` (from step 2)
+4. Click **Deploy** → wait ~3 min → you get a URL like `https://crm-YOU.koyeb.app`
+5. Open it → log in with `admin@crm.io` / `admin123` → **send the link to your client** 🎉
+
+More detailed guides: [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md) (Docker) · [DEPLOY.md](DEPLOY.md) (Render + Neon + Vercel)
+
+---
+
 
 
 Agentcis-style CRM — **FastAPI backend** + **React (Vite + TypeScript) frontend** — with auth, role-based permissions, document upload, dashboard, and full CRUD for the core modules.

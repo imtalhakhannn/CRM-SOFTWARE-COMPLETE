@@ -1,0 +1,33 @@
+# Root .dockerignore — controls the all-in-one build context
+.git
+.gitignore
+.github
+.claude
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Python
+**/__pycache__
+**/*.pyc
+backend/.venv
+backend/*.db
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Node
+frontend/node_modules
+frontend/dist
+frontend/.vite
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Docs/images
+*.md
+!backend/alembic/README
+WhatsApp*.jpeg
