@@ -1,23 +1,32 @@
 # CRM Software
 
-## 🚀 One-click deploy (single container, one URL)
+## 🚀 One-click deploy — zero database setup
 
-The repo ships with an **all-in-one Dockerfile** that bundles the React frontend into the FastAPI backend, so you deploy **one service** and get **one public URL**.
+All-in-one Docker image that bundles React frontend + FastAPI backend + **SQLite**.
+**No database provisioning, no credit card, one URL.**
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE&branch=main&name=crm&builder=dockerfile&ports=8000;http;/&env[SECRET_KEY]=change-me-to-a-long-random-string&env[SEED_ON_STARTUP]=true&env[BACKEND_CORS_ORIGINS]=*)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE&branch=main&name=crm&builder=dockerfile&ports=8000;http;/&env[SECRET_KEY]=replace-me-with-a-long-random-string&env[BACKEND_CORS_ORIGINS]=*&instance_type=nano)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
 
-After clicking **Deploy to Koyeb** (easiest, no credit card):
+### The 3-click path on Koyeb (truly free, no credit card)
 
-1. Sign up with GitHub (one time, ~30 s)
-2. Add a free **Koyeb Postgres** service → copy its connection string
-3. On the CRM service page → **Environment** → set:
-   - `DATABASE_URL` = `postgresql+psycopg2://…` (from step 2)
-4. Click **Deploy** → wait ~3 min → you get a URL like `https://crm-YOU.koyeb.app`
-5. Open it → log in with `admin@crm.io` / `admin123` → **send the link to your client** 🎉
+1. Click the **Deploy to Koyeb** button above
+2. Sign up with GitHub (~30 s email verification)
+3. On the deploy form, everything is pre-filled — just hit the green **Deploy** button
 
-More detailed guides: [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md) (Docker) · [DEPLOY.md](DEPLOY.md) (Render + Neon + Vercel)
+Wait ~3 min → you get a URL like `https://crm-YOU.koyeb.app`.
+Open it → log in with `admin@crm.io` / `admin123` → **send the link to your client** 🎉
+
+### Want persistent data later?
+
+The SQLite file at `/data/crm.db` is ephemeral on free tiers (wiped on redeploy). Swap in free Postgres when you need persistence:
+
+1. Koyeb dashboard → Create Database Service → free Postgres
+2. Copy connection string, prepend `postgresql+psycopg2://`
+3. Add env var `DATABASE_URL=…` on the CRM service → redeploy
+
+More guides: [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md) · [DEPLOY.md](DEPLOY.md)
 
 ---
 

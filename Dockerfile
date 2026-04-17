@@ -39,7 +39,8 @@ RUN pip install --prefix=/install -r requirements.txt
 FROM python:3.11-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
-    UPLOAD_DIR=/app/uploads PORT=8000 FRONTEND_DIST=/app/static
+    UPLOAD_DIR=/data/uploads PORT=8000 FRONTEND_DIST=/app/static \
+    DATABASE_URL=sqlite:////data/crm.db
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libpq5 default-mysql-client \
@@ -52,7 +53,8 @@ COPY --from=backend-builder /install /usr/local
 COPY --chown=app:app backend/ /app/
 COPY --from=frontend --chown=app:app /web/dist /app/static
 
-RUN mkdir -p /app/uploads && chown -R app:app /app
+RUN mkdir -p /data/uploads && chown -R app:app /app /data
+VOLUME ["/data"]
 
 USER app
 EXPOSE 8000
