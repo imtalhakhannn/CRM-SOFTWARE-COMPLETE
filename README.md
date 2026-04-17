@@ -9,14 +9,18 @@ All-in-one Docker image that bundles React frontend + FastAPI backend + **SQLite
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/imtalhakhannn/CRM-SOFTWARE-COMPLETE)
 
-### The 3-click path on Koyeb (truly free, no credit card)
+### ✅ Render (currently the only truly free option, no credit card)
 
-1. Click the **Deploy to Koyeb** button above
-2. Sign up with GitHub (~30 s email verification)
-3. On the deploy form, everything is pre-filled — just hit the green **Deploy** button
+> ⚠️ **Koyeb now requires a credit card** ($10 verification hold). **Use Render instead** — same 3-click flow, still 100% free.
 
-Wait ~3 min → you get a URL like `https://crm-YOU.koyeb.app`.
+1. Go to **https://render.com** → **Sign up with GitHub**
+2. On the dashboard: **New +** → **Blueprint** → select your `CRM-SOFTWARE-COMPLETE` repo
+3. Render reads `render.yaml` and pre-fills everything → click **Apply**
+
+Wait ~4 min while Render builds the Docker image → you get a URL like `https://crm-YOU.onrender.com`.
 Open it → log in with `admin@crm.io` / `admin123` → **send the link to your client** 🎉
+
+First request after 15 min idle takes ~30 s (free-tier cold start). Then it's instant.
 
 ### Want persistent data later?
 

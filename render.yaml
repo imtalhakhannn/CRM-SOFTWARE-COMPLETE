@@ -1,34 +1,28 @@
-# Render Blueprint — deploys the FastAPI backend as a free Web Service.
-# Steps to deploy:
-#   1. Push this repo to GitHub
-#   2. Go to https://render.com → New → Blueprint → pick this repo
-#   3. Render reads this file and provisions the service
-#   4. Set the DATABASE_URL env var to your Neon/Supabase Postgres connection string
+# Render Blueprint — deploys the all-in-one CRM as a free Docker Web Service.
+#
+# Free tier on Render: 750 h/month, 512 MB RAM, NO credit card required.
+# Cold-starts after 15 min idle (first request after idle takes ~30 s).
+#
+# Steps:
+#   1. Push this repo to GitHub (already done)
+#   2. Go to https://render.com → sign up with GitHub → New → Blueprint
+#   3. Pick this repo → Render reads this file and deploys everything
+#   4. SQLite is the default DB — no extra provisioning needed
 services:
   - type: web
-    name: crm-backend
-    runtime: python
+    name: crm
+    runtime: docker
     plan: free
     region: oregon
-    rootDir: backend
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "bash start.sh"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.10"
       - key: SECRET_KEY
-        generateValue: true            # Render auto-generates a random value
+        generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "1440"
-      - key: UPLOAD_DIR
-        value: "/tmp/uploads"          # ephemeral — fine for demo; use cloud storage for production
+      - key: BACKEND_CORS_ORIGINS
+        value: "*"
       - key: MAX_UPLOAD_SIZE_MB
         value: "25"
-      - key: DATABASE_URL
-        sync: false                    # set manually in Render dashboard after creating Neon DB
-      - key: BACKEND_CORS_ORIGINS
-        sync: false                    # set to your Vercel URL, e.g. https://my-crm.vercel.app
-      # Flip SEED_ON_STARTUP=true on first deploy to populate demo data, then remove it.
-      - key: SEED_ON_STARTUP
-        value: "false"
