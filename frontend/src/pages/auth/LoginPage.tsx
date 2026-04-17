@@ -6,8 +6,8 @@ import { useAuthStore } from "@/store/auth";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("admin@crm.io");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
@@ -90,12 +90,6 @@ export default function LoginPage() {
           <button type="submit" className="btn-primary w-full py-3" disabled={loading}>
             {loading ? "Signing in..." : "Sign in to Dashboard"}
           </button>
-
-          <div className="mt-6 p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600">
-            <div className="font-semibold text-slate-700 mb-1">Demo credentials</div>
-            <div>Admin · <code>admin@crm.io</code> / <code>admin123</code></div>
-            <div>Consultant · <code>consultant@crm.io</code> / <code>consultant123</code></div>
-          </div>
         </form>
       </div>
     </div>
