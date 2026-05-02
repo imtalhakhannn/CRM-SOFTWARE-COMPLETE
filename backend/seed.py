@@ -106,16 +106,16 @@ def run(fresh: bool = False, if_empty: bool = False):
                           hashed_password=hash_password("consultant123"), branch_id=branches[0].id, team_id=teams[1].id,
                           phone="+61 400 333 444")
         consultant2 = User(email="priya@crm.io", full_name="Priya Sharma", role=UserRole.CONSULTANT,
-                           hashed_password=hash_password("consultant123"), branch_id=branches[1].id, team_id=teams[1].id,
+                           hashed_password=hash_password("demo123"), branch_id=branches[1].id, team_id=teams[1].id,
                            phone="+61 400 555 666")
         agent1 = User(email="james@crm.io", full_name="James Park", role=UserRole.AGENT,
-                      hashed_password=hash_password("agent123"), branch_id=branches[0].id,
+                      hashed_password=hash_password("demo123"), branch_id=branches[0].id,
                       phone="+61 400 777 888")
         agent2 = User(email="fatima@crm.io", full_name="Fatima Khan", role=UserRole.AGENT,
-                      hashed_password=hash_password("agent123"), branch_id=branches[2].id,
+                      hashed_password=hash_password("demo123"), branch_id=branches[2].id,
                       phone="+92 300 123 4567")
         agent3 = User(email="liam@crm.io", full_name="Liam O'Brien", role=UserRole.AGENT,
-                      hashed_password=hash_password("agent123"), branch_id=branches[1].id,
+                      hashed_password=hash_password("demo123"), branch_id=branches[1].id,
                       phone="+61 400 999 000")
         users = [admin, abrar, manager, consultant, consultant2, agent1, agent2, agent3]
         db.add_all(users); db.flush()
@@ -411,6 +411,7 @@ def run(fresh: bool = False, if_empty: bool = False):
         print("   Login: abrar@gmail.com / abrar123")
         print("   Login: manager@crm.io / manager123")
         print("   Login: consultant@crm.io / consultant123")
+        print("   Login: priya|james|fatima|liam @ crm.io / demo123")
         print(f"   Seeded: {len(contacts)} contacts, {len(apps)} applications, {len(tasks)} tasks, "
               f"{len(appts)} appointments, {len(invoices)} invoices, {len(campaigns)} campaigns, "
               f"{len(materials)} course materials")
