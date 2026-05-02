@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
-# Production startup: run pending migrations, optionally seed, then launch uvicorn.
+# Production startup: run pending migrations, seed demo data when the DB is
+# empty, then launch uvicorn. Idempotent — safe to run on every container
+# boot, including ephemeral filesystems (Hugging Face Spaces, Render free
+# tier, etc.) where the DB is recreated from scratch on each restart.
 set -e
 
-# Auto-seed on first boot when using the default SQLite file — if the DB file
-# doesn't exist yet, we seed demo data so the app is usable immediately.
-if [[ "${DATABASE_URL:-}" == sqlite:////data/crm.db ]] && [ ! -f /data/crm.db ]; then
-  export SEED_ON_STARTUP="${SEED_ON_STARTUP:-true}"
-  echo "[start] first boot with SQLite — enabling SEED_ON_STARTUP"
-fi
-
 echo "[start] applying migrations..."
-alembic upgrade head
+# Don't let alembic kill the container if a migration is broken on the
+# current dialect — seed.py will call Base.metadata.create_all to fill any
+# gaps. Surface the error so it's visible in logs.
+alembic upgrade head || echo "[start] alembic upgrade failed — seed will create_all as fallback"
 
-# Optional seeding: set SEED_ON_STARTUP=true in the env, deploy, then remove
-# the env var so subsequent restarts don't reseed.
-if [ "${SEED_ON_STARTUP,,}" = "true" ]; then
-  echo "[start] SEED_ON_STARTUP=true detected — running seed script"
-  python seed.py --fresh || echo "[start] seed failed (ok if already seeded)"
+if [ "${FORCE_RESEED,,}" = "true" ]; then
+  echo "[start] FORCE_RESEED=true — wiping and re-seeding"
+  python seed.py --fresh
+elif [ "${SEED_ON_STARTUP,,}" = "true" ]; then
+  echo "[start] SEED_ON_STARTUP=true — wiping and re-seeding"
+  python seed.py --fresh
+else
+  # Idempotent: only seeds if the users table is empty. Errors propagate.
+  echo "[start] seeding demo data if DB is empty..."
+  python seed.py --if-empty
 fi
 
 echo "[start] launching uvicorn on port ${PORT:-8000}..."

@@ -1,6 +1,12 @@
-"""Seed realistic demo data. Run: python seed.py [--fresh]
+"""Seed realistic demo data. Run: python seed.py [--fresh|--if-empty]
 
-With --fresh, wipes ALL rows before seeding.
+  --fresh     wipes ALL rows before seeding (default if you want to reset).
+  --if-empty  only seeds when the users table is empty — safe to run on every
+              boot so deployments on ephemeral filesystems (Hugging Face
+              Spaces, etc.) always come up with demo data.
+
+With no flag the script behaves like the original: it bails if an admin user
+already exists.
 """
 import random
 import secrets
@@ -28,7 +34,9 @@ from app.models.user import Branch, Team, User, UserRole
 
 
 def _wipe(db):
-    # order matters: children first
+    # order matters: children first. Wrap each DELETE so a missing table
+    # (e.g. fresh SQLite where alembic skipped a CREATE) doesn't abort the
+    # whole wipe.
     for tbl in [
         "payments", "invoice_items", "invoices",
         "quotation_items", "quotations",
@@ -40,17 +48,30 @@ def _wipe(db):
         "contacts",
         "teams", "users", "branches",
     ]:
-        db.execute(text(f"DELETE FROM {tbl}"))
+        try:
+            db.execute(text(f"DELETE FROM {tbl}"))
+        except Exception as e:
+            db.rollback()
+            print(f"[seed] _wipe: skipped {tbl} ({e.__class__.__name__})")
     db.commit()
 
 
-def run(fresh: bool = False):
+def run(fresh: bool = False, if_empty: bool = False):
     ensure_database()
+    # Belt-and-braces: alembic migrations create most tables, but if any are
+    # missing (broken migration on SQLite, fresh ephemeral disk) this fills
+    # the gaps so seeding never crashes on "no such table".
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
-        if fresh:
+        if if_empty:
+            existing = db.query(User).count()
+            if existing > 0:
+                print(f"[seed] DB has {existing} users — skipping (--if-empty).")
+                return
+            print("[seed] DB is empty — proceeding with seed.")
+        elif fresh:
             _wipe(db)
         elif db.query(User).filter(User.email == "admin@crm.io").first():
             print("Admin already exists — pass --fresh to reseed.")
@@ -75,6 +96,9 @@ def run(fresh: bool = False):
         admin = User(email="admin@crm.io", full_name="Admin User", role=UserRole.SUPER_ADMIN,
                      hashed_password=hash_password("admin123"), branch_id=branches[0].id, team_id=teams[0].id,
                      phone="+61 400 000 000")
+        abrar = User(email="abrar@gmail.com", full_name="Abrar", role=UserRole.SUPER_ADMIN,
+                     hashed_password=hash_password("abrar123"), branch_id=branches[0].id, team_id=teams[0].id,
+                     phone="+92 300 000 0000")
         manager = User(email="manager@crm.io", full_name="Sarah Mitchell", role=UserRole.MANAGER,
                        hashed_password=hash_password("manager123"), branch_id=branches[0].id, team_id=teams[0].id,
                        phone="+61 400 111 222")
@@ -93,7 +117,7 @@ def run(fresh: bool = False):
         agent3 = User(email="liam@crm.io", full_name="Liam O'Brien", role=UserRole.AGENT,
                       hashed_password=hash_password("agent123"), branch_id=branches[1].id,
                       phone="+61 400 999 000")
-        users = [admin, manager, consultant, consultant2, agent1, agent2, agent3]
+        users = [admin, abrar, manager, consultant, consultant2, agent1, agent2, agent3]
         db.add_all(users); db.flush()
 
         # --- Workflows ---
@@ -384,6 +408,7 @@ def run(fresh: bool = False):
 
         print("[OK] Seed complete.")
         print("   Login: admin@crm.io / admin123")
+        print("   Login: abrar@gmail.com / abrar123")
         print("   Login: manager@crm.io / manager123")
         print("   Login: consultant@crm.io / consultant123")
         print(f"   Seeded: {len(contacts)} contacts, {len(apps)} applications, {len(tasks)} tasks, "
@@ -394,4 +419,4 @@ def run(fresh: bool = False):
 
 
 if __name__ == "__main__":
-    run(fresh="--fresh" in sys.argv)
+    run(fresh="--fresh" in sys.argv, if_empty="--if-empty" in sys.argv)
