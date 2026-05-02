@@ -120,6 +120,11 @@ def run(fresh: bool = False, if_empty: bool = False):
         users = [admin, abrar, manager, consultant, consultant2, agent1, agent2, agent3]
         db.add_all(users); db.flush()
 
+        # Commit users immediately so a downstream failure (campaigns,
+        # invoices, etc.) can't roll back the demo logins. Login takes
+        # priority over demo data.
+        db.commit()
+
         # --- Workflows ---
         workflow_defs = [
             ("Australian Education", "#6366f1", ["Enquiry", "Application", "Offer", "COE", "Visa", "Completed"]),
@@ -420,4 +425,15 @@ def run(fresh: bool = False, if_empty: bool = False):
 
 
 if __name__ == "__main__":
-    run(fresh="--fresh" in sys.argv, if_empty="--if-empty" in sys.argv)
+    # Critical users (admin, abrar, etc.) are committed early inside run(), so
+    # if a downstream demo-data section crashes we still want exit 0 so the
+    # container can launch uvicorn. The bootstrap_users hook in app.main is
+    # the final safety net.
+    try:
+        run(fresh="--fresh" in sys.argv, if_empty="--if-empty" in sys.argv)
+    except Exception as e:
+        import traceback
+        print(f"[seed] WARNING: demo-data crashed ({e.__class__.__name__}: {e})")
+        print("[seed] users are already committed; login still works.")
+        traceback.print_exc()
+        sys.exit(0)

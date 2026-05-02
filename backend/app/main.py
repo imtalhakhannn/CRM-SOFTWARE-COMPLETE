@@ -11,6 +11,7 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.base_class import Base
 from app.db.bootstrap import ensure_database
+from app.db.bootstrap_users import ensure_default_users
 from app.db.session import engine
 import app.models  # noqa: F401  — ensure models registered
 
@@ -19,6 +20,9 @@ import app.models  # noqa: F401  — ensure models registered
 async def lifespan(app: FastAPI):
     ensure_database()
     Base.metadata.create_all(bind=engine)
+    # Belt-and-braces: guarantees demo logins work even if seed.py crashed
+    # during container start (broken migration, missing table, etc.).
+    ensure_default_users()
     yield
 
 
